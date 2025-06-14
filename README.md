@@ -133,6 +133,9 @@ ros2 run happy_nav happy_teleop_node
 - [happy_move_node](happy_nav/happy_move_node.py)
 ```bash
 ros2 run happy_nav happy_move_node
+
+# 止める
+ros2 topic pub -1 /cmd_vel geometry_msgs/msg/Twist '{linear: {x: 0.0}, angular: {z: 0.0}}'
 ```
 
 <details><summary>⚠ numpyが1系でないと tf_transformations.euler_from_quaternionがエラーになる</summary>
