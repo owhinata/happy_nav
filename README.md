@@ -70,3 +70,106 @@ ros2 run ros_gz_bridge parameter_bridge /lidar2@sensor_msgs/msg/LaserScan[igniti
 . /opt/ros/humble/setup.bash
 rviz2 # Global Options > Fixed frame: vehicle_blue/lidar_link/gpu_lidar, Add Topic: /laser_scan
 ```
+
+💡 古いGazeboはここっから
+
+## インストール
+
+```
+sudo apt-get install -y \
+ros-humble-navigation2 \
+ros-humble-nav2-bringup \
+ros-humble-slam-toolbox \
+ros-humble-teleop-tools \
+ros-humble-cartographer \
+ros-humble-cartographer-ros \
+ros-humble-dynamixel-sdk \
+ros-humble-xacro \
+ros-humble-ament-cmake-clang-format \
+ros-humble-rmw-cyclonedds-cpp
+
+sudo apt-get install -y python3-numpy python3-matplotlib python3-seaborn
+
+echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
+echo "export TURTLEBOT3_MODEL=happy_mini" >> ~/.bashrc
+
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git src/turtlebot3_msgs
+git clone https://github.com/AI-Robot-Book-Humble/turtlebot3_happy_mini.git src/turtlebot3_happy_mini
+git clone https://github.com/owhinata/happy_nav src/happy_nav
+
+. /opt/ros/humble/setup.bash
+rosdep install --default-yes --from-paths src --ignore-src
+colcon build --symlink-install
+. install/setup.bash
+```
+
+## シミュレータの起動
+
+```bash
+. /usr/share/gazebo/setup.bash
+
+# ↓ のどれか
+ros2 launch turtlebot3_gazebo empty_world.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_house2.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_dqn_stage1.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_dqn_stage2.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_dqn_stage3.launch.py
+ros2 launch turtlebot3_gazebo turtlebot3_dqn_stage4.launch.py
+```
+
+## Nodes
+- teleop_twist_keyboard
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+- [happy_teleop_node](happy_nav/happy_teleop_node.py)
+```bash
+ros2 run happy_nav happy_teleop_node
+```
+
+- [happy_move_node](happy_nav/happy_move_node.py)
+```bash
+ros2 run happy_nav happy_move_node
+```
+
+<details><summary>⚠ numpyが1系でないと tf_transformations.euler_from_quaternionがエラーになる</summary>
+
+```bash
+$ ros2 run happy_nav happy_move_node 
+Traceback (most recent call last):
+  File "/home/ouwa/work/ros2_ws/install/happy_nav/lib/happy_nav/happy_move_node", line 33, in <module>
+    sys.exit(load_entry_point('happy-nav', 'console_scripts', 'happy_move_node')())
+  File "/home/ouwa/work/ros2_ws/install/happy_nav/lib/happy_nav/happy_move_node", line 25, in importlib_load_entry_point
+    return next(matches).load()
+  File "/usr/lib/python3.10/importlib/metadata/__init__.py", line 171, in load
+    module = import_module(match.group('module'))
+  File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/ouwa/work/ros2_ws/build/happy_nav/happy_nav/happy_move_node.py", line 3, in <module>
+    import tf_transformations
+  File "/opt/ros/humble/lib/python3.10/site-packages/tf_transformations/__init__.py", line 46, in <module>
+    import transforms3d
+  File "/usr/lib/python3/dist-packages/transforms3d/__init__.py", line 10, in <module>
+    from . import quaternions
+  File "/usr/lib/python3/dist-packages/transforms3d/quaternions.py", line 26, in <module>
+    _MAX_FLOAT = np.maximum_sctype(np.float)
+  File "/home/ouwa/.local/lib/python3.10/site-packages/numpy/__init__.py", line 400, in __getattr__
+    raise AttributeError(
+AttributeError: `np.maximum_sctype` was removed in the NumPy 2.0 release. Use a specific dtype instead. You should avoid relying on any implicit mechanism and select the largest dtype of a kind explicitly in the code.
+[ros2run]: Process exited with failure 1
+```
+</details>
+
+pip3でインストールするとたぶん2系が入るので aptで入れ直す。
+
+
+
